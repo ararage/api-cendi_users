@@ -11,16 +11,82 @@ import com.api.cendi.Student
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
-//@Transactional
 class UserService {
 
 	def validAccess = new ValidAccess()
 
-	@Transactional
-    public def getUser(def user_id,def params,def dominio) {
+    public def getUser(def params,def dominio){
+        Map jsonResult = [:]
+        def userResult
+
+        if(!params.user_id){
+             throw new NotFoundException("Invalid URL, missing user_id")
+        }
+
+        userResult = Student.findByPersonalId(params.user_id)
+
+        existUser(userResult,params.user_id)
+
+        //jsonResult = getResultAdmin(userResult)
+
+        println "Le user type "+userResult.type
+        if(userResult.type.equals("student")){
+            jsonResult = getStudentByAdmin(userResult)
+        }
+        jsonResult
+    }
+
+    private def existUser(def userResult, def user_id){
+        if (!userResult){
+            throw new NotFoundException("The user with the user_id = "+user_id+" not found")
+        }
+        if(userResult.status.equals("blocked")){
+            throw new NotFoundException("The user with the user_id = "+user_id+" its blocked")
+        }else if(userResult.status.equals("deleted")){
+            throw new NotFoundException("The user with the user_id = "+user_id+" was deleted")
+        }else if(userResult.status.equals("history")){
+            throw new NotFoundException("The user with the user_id = "+user_id+" was graduated.")
+        }
+    }
+
+    public def getUsers(def params,def dominio) {
+        Map SEARCH_PARAMS_MAP = [
+                school          :   "school",
+                group           :   "group",
+                status          :   "status",
+                type            :   "type",
+                age             :   "age"
+        ]
+
+        //println "Llegue"
     	Map jsonResult = [:]
+
+        if(!params.user_id){
+            throw new NotFoundException("Bad URL ==> missing user_id!!!")
+        }
+
+        //if(params.access_token){
+            
+        //}else{
+
+        //}
+
     	jsonResult.ad = 2
     	jsonResult
+    }
+
+    public def putUser(def params,def dominio,def json){
+        Map jsonResult = [:]
+        def responseMessage = ''
+        def usuario 
+
+        if(!params.user_id){
+             throw new NotFoundException("Invalid URL, missing user_id")
+        }
+
+        if(!json.type){
+            throw new ConflictException("Bad JSON, type is missing!!!")
+        }
 
 
     }

@@ -57,7 +57,7 @@ environments {
 }
 */
 
-nvironments {
+environments {
     development {
         grails {
             mongo {

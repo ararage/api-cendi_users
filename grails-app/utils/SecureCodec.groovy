@@ -8,7 +8,7 @@ import org.apache.commons.codec.binary.Hex
 
 class SecureCodec{
 
-    static String password = "MPDavidPMAxi12345"
+    static String password = "CENDI55489636"
 
     static encode = { str ->
 

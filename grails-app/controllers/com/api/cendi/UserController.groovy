@@ -57,18 +57,16 @@ class UserController {
     def getUser() {
         setHeaders()
         def dominio = request.getServerName()+":"+request.getServerPort()
-        def user_id = params.user_id
         def result = [:]
         int retryCounter = 0
         int maxretry=15
         boolean needsProcessing = true
         while(needsProcessing && retryCounter < maxretry) {
             try{
-                result = userService.getUser(user_id, params,dominio)
+                result = userService.getUser(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
-                println "Chocomilk"
-                needsProcessing=false;
                 render result as GSON
+                needsProcessing=false;
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -96,11 +94,8 @@ class UserController {
         int maxretry=15
         boolean needsProcessing = true
         while(needsProcessing && retryCounter < maxretry) {
-            println "Entre"
             try{
-                println "Le json "+request.JSON
                 result = userService.postUser(request.JSON,dominio)
-                println "Die"
                 response.setStatus( HttpServletResponse.SC_CREATED)
                 needsProcessing=false;
                 render result as GSON
