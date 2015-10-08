@@ -117,4 +117,36 @@ class UserController {
             }
         }
     }
+
+    def putUser(){
+        setHeaders()
+        def dominio = request.getServerName()+":"+request.getServerPort()
+        def result
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                result = userService.putUser(params,dominio,request.JSON)
+                response.setStatus( HttpServletResponse.SC_CREATED)
+                needsProcessing=false;
+                render result as GSON
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (BadRequestException e) {
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
 }

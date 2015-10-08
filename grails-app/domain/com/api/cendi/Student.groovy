@@ -23,7 +23,7 @@ class Student{
 
     static constraints = {
         personalId      (nullable:false, blank:false, unique:true)
-        email           (nullable:false, blank:false, email:true, unique:true)
+        email           (nullable:false, blank:false, email:true, unique:false)
         name            (nullable:false, blank:false, maxSize:256)
         fName           (nullable:false, blank:false, maxSize:256)
         lName           (nullable:false, blank:false, maxSize:256)
@@ -32,7 +32,8 @@ class Student{
         sex             (nullable:false, blank:false, inList:["Male","Female"])
         profilePicture  (nullable:false, blank:true)
         status          (nullable:false, blank:false, inList:['active','deleted', 'blocked', 'history'])
-        type            (nullable:false, blank:false, inList:['admin','teacher','student'])
+        //type            (nullable:false, blank:false, inList:['admin','teacher','student'])
+        type            (nullable:false, blank:false, inList:['student'])
         group (blank:false, nullable:false, unique:false)
         school (blank:false, nullable:false, unique:false)
     }

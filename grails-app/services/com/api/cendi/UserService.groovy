@@ -33,8 +33,11 @@ class UserService {
         if(userResult.type.equals("student")){
             jsonResult = getStudentByAdmin(userResult)
         }
+
         jsonResult
     }
+
+
 
     private def existUser(def userResult, def user_id){
         if (!userResult){
@@ -80,15 +83,99 @@ class UserService {
         def responseMessage = ''
         def usuario 
 
+        if(!json){
+            throw new ConflictException("Empty JSON!")
+        }
+
         if(!params.user_id){
-             throw new NotFoundException("Invalid URL, missing user_id")
+            throw new NotFoundException("Invalid URL, missing user_id")
         }
 
         if(!json.type){
             throw new ConflictException("Bad JSON, type is missing!!!")
         }
 
+        if(json.type.equals("student")){
+            usuario = Student.findByPersonalIdAndType(params.user_id,json.type)
 
+            existUser(usuario,params.user_id)
+
+            jsonResult = modificaStudent(dominio,usuario,json)
+        }
+        jsonResult
+    }
+
+    private def modificaStudent(def dominio, def usuario, def json){
+        def responseMessage = ''
+        Map jsonResult = [:]
+
+        if(json?.type.equals("student")){
+            if(json?.group){
+                usuario.group = json.group
+            }
+
+            if(json?.school){
+                usuario.school = json.school
+            }
+
+            if(json?.email){
+                usuario.email = json.email
+            }     
+            
+            if(json?.name){
+                usuario.name = json.name
+            }  
+
+            if(json?.fName){
+                usuario.fName = json.fName
+            }  
+
+            if(json?.lName){
+                usuario.lName = json.lName
+            }  
+
+            if(json?.sex){
+                usuario.sex = json.sex
+            }  
+
+            if(json?.profilePicture){
+                usuario.profilePicture = json.profilePicture
+            }
+
+            if(json?.status){
+                usuario.status = json.status
+            }
+
+            if(json?.group){
+                usuario.group = json.group
+            }
+
+            if(json?.school){
+                usuario.school = json.school
+            }
+
+            if(json?.dateOfBirth){
+                //usuario.dateOfBirth = json.dateOfBirth
+                try{
+                    json.dateOfBirth = ISODateTimeFormat.dateTimeParser().parseDateTime(json?.dateOfBirth).toDate()
+                }catch(Exception e){
+                    throw new BadRequestException("Wrong date format in date_of_birth. Must be ISO json format")
+                }
+            }  
+
+            usuario.dateLastUpdate = new Date()
+
+            if(!usuario.validate()){
+                usuario.errors.allErrors.each {
+                    responseMessage += MessageFormat.format(it.defaultMessage, it.arguments) + " "
+                }
+                throw new BadRequestException(responseMessage)
+            }
+
+            usuario.save(flush:true)
+            jsonResult = getStudentByAdmin(usuario)
+        }
+        jsonResult
     }
 
     public def postUser(def jsonUser,def dominio){
