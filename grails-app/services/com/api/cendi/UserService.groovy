@@ -37,48 +37,8 @@ class UserService {
         jsonResult
     }
 
-
-
-    private def existUser(def userResult, def user_id){
-        if (!userResult){
-            throw new NotFoundException("The user with the user_id = "+user_id+" not found")
-        }
-        if(userResult.status.equals("blocked")){
-            throw new NotFoundException("The user with the user_id = "+user_id+" its blocked")
-        }else if(userResult.status.equals("deleted")){
-            throw new NotFoundException("The user with the user_id = "+user_id+" was deleted")
-        }else if(userResult.status.equals("history")){
-            throw new NotFoundException("The user with the user_id = "+user_id+" was graduated.")
-        }
-    }
-
-    public def getUsers(def params,def dominio) {
-        Map SEARCH_PARAMS_MAP = [
-                school          :   "school",
-                group           :   "group",
-                status          :   "status",
-                type            :   "type",
-                age             :   "age"
-        ]
-
-        //println "Llegue"
-    	Map jsonResult = [:]
-
-        if(!params.user_id){
-            throw new NotFoundException("Bad URL ==> missing user_id!!!")
-        }
-
-        //if(params.access_token){
-            
-        //}else{
-
-        //}
-
-    	jsonResult.ad = 2
-    	jsonResult
-    }
-
     public def putUser(def params,def dominio,def json){
+        println "Entra"
         Map jsonResult = [:]
         def responseMessage = ''
         def usuario 
@@ -96,12 +56,114 @@ class UserService {
         }
 
         if(json.type.equals("student")){
-            usuario = Student.findByPersonalIdAndType(params.user_id,json.type)
-
+            usuario = Student.findByPersonalId(params.user_id)
+            println "Usuario "+usuario
             existUser(usuario,params.user_id)
 
             jsonResult = modificaStudent(dominio,usuario,json)
         }
+        jsonResult
+    }
+
+    public def postUser(def jsonUser,def dominio){
+        Map jsonResult = [:]
+        def responseMessage = ''
+        //def newUser
+        if(!jsonUser){
+            throw new ConflictException("Empty JSON!")
+        }
+
+        if(!jsonUser.type){
+            throw new ConflictException("Bad JSON: type not found on the json!")
+        }
+
+        if(jsonUser.dateOfBirth){
+             try{
+                jsonResult.dateOfBirth = ISODateTimeFormat.dateTimeParser().parseDateTime(jsonUser?.dateOfBirth).toDate()
+            }catch(Exception e){
+                throw new BadRequestException("Wrong date format in date_of_birth. Must be ISO json format")
+            }
+        }else{
+            throw new ConflictException("Bad JSON: birth not found on the json!")
+        }
+
+        if(jsonUser.type.equals("student")){
+            Student newUser = new Student()
+            
+            newUser.personalId  = jsonUser?.personalId
+            newUser.email = jsonUser?.email
+            newUser.name = jsonUser?.name
+            newUser.fName = jsonUser?.fName
+            newUser.lName = jsonUser?.lName
+            newUser.dateOfBirth = jsonResult?.dateOfBirth
+            newUser.sex = jsonUser?.sex
+            newUser.profilePicture = jsonUser?.profilePicture
+            newUser.status = jsonUser?.status
+            newUser.type = jsonUser?.type
+            newUser.age = jsonUser?.age
+            newUser.group  = jsonUser?.group
+            newUser.school = jsonUser?.school
+
+            if(!newUser.validate()) {
+                newUser.errors.allErrors.each {
+                    responseMessage += MessageFormat.format(it.defaultMessage, it.arguments) + " "
+                }
+                throw new BadRequestException(responseMessage)
+            }
+            newUser.save(flush:true)
+            println "Usuario "+newUser.personalId
+            jsonResult = getStudentByAdmin(newUser)
+        }
+
+        jsonResult
+    }
+
+    public def deleteUser(def params,def dominio){
+        Map jsonResult = [:]
+        def userResult
+
+        if(!params.user_id){
+             throw new NotFoundException("Invalid URL, missing user_id")
+        }
+
+        userResult = Student.findByPersonalId(params.user_id)
+
+        existUser(userResult,params.user_id)
+
+        //jsonResult = getResultAdmin(userResult)
+
+        println "Le user type "+userResult.type
+        if(userResult.type.equals("student")){
+            //jsonResult = getStudentByAdmin(userResult)
+            jsonResult.comment = "The user with the user_id "+params.user_id+" has been deleted successfully"
+            userResult.delete(flush:true)
+        }
+        jsonResult
+    }
+
+    public def getUsers(def params,def dominio) {
+        Map SEARCH_PARAMS_MAP = [
+                school          :   "school",
+                group           :   "group",
+                status          :   "status",
+                type            :   "type",
+                age             :   "age"
+        ]
+
+        //println "Llegue"
+        Map jsonResult = [:]
+
+        if(!params.user_id){
+            throw new NotFoundException("Bad URL ==> missing user_id!!!")
+        }
+
+        //if(params.access_token){
+            
+        //}else{
+
+        //}
+
+        jsonResult.ad = 2
         jsonResult
     }
 
@@ -178,57 +240,19 @@ class UserService {
         jsonResult
     }
 
-    public def postUser(def jsonUser,def dominio){
-    	Map jsonResult = [:]
-    	def responseMessage = ''
-    	//def newUser
-    	if(!jsonUser){
-    		throw new ConflictException("Empty JSON!")
-    	}
-
-    	if(!jsonUser.type){
-    		throw new ConflictException("Bad JSON: type not found on the json!")
-    	}
-
-    	if(jsonUser.dateOfBirth){
-    		 try{
-                jsonResult.dateOfBirth = ISODateTimeFormat.dateTimeParser().parseDateTime(jsonUser?.dateOfBirth).toDate()
-            }catch(Exception e){
-                throw new BadRequestException("Wrong date format in date_of_birth. Must be ISO json format")
-            }
-    	}else{
-    		throw new ConflictException("Bad JSON: birth not found on the json!")
-    	}
-
-    	if(jsonUser.type.equals("student")){
-    		Student newUser = new Student()
-    		
-    		newUser.personalId  = jsonUser?.personalId
-    		newUser.email = jsonUser?.email
-    		newUser.name = jsonUser?.name
-    		newUser.fName = jsonUser?.fName
-    		newUser.lName = jsonUser?.lName
-    		newUser.dateOfBirth = jsonResult?.dateOfBirth
-    		newUser.sex = jsonUser?.sex
-    		newUser.profilePicture = jsonUser?.profilePicture
-    		newUser.status = jsonUser?.status
-    		newUser.type = jsonUser?.type
-    		newUser.age = jsonUser?.age
-    		newUser.group  = jsonUser?.group
-    		newUser.school = jsonUser?.school
-
-    		if(!newUser.validate()) {
-            	newUser.errors.allErrors.each {
-                	responseMessage += MessageFormat.format(it.defaultMessage, it.arguments) + " "
-            	}
-            	throw new BadRequestException(responseMessage)
-			}
-			newUser.save(flush:true)
-			println "Usuario "+newUser.personalId
-			jsonResult = getStudentByAdmin(newUser)
-    	}
-
-    	jsonResult
+    private def existUser(def userResult, def user_id){
+        if (!userResult){
+            throw new NotFoundException("The user with the user_id = "+user_id+" not found")
+        }
+        
+        //if(userResult.status.equals("blocked")){
+        //    throw new NotFoundException("The user with the user_id = "+user_id+" its blocked")
+        //}else if(userResult.status.equals("deleted")){
+        //    throw new NotFoundException("The user with the user_id = "+user_id+" was deleted")
+        //}else 
+        if(userResult.status.equals("history")){
+            throw new NotFoundException("The user with the user_id = "+user_id+" was graduated.")
+        }
     }
 
     private def getStudentByAdmin(def newUser){

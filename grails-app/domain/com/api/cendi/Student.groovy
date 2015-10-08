@@ -31,7 +31,7 @@ class Student{
         dateDelete      (nullable:true, blank:true)
         sex             (nullable:false, blank:false, inList:["Male","Female"])
         profilePicture  (nullable:false, blank:true)
-        status          (nullable:false, blank:false, inList:['active','deleted', 'blocked', 'history'])
+        status          (nullable:false, blank:false, inList:['active','blocked', 'history'])
         //type            (nullable:false, blank:false, inList:['admin','teacher','student'])
         type            (nullable:false, blank:false, inList:['student'])
         group (blank:false, nullable:false, unique:false)
