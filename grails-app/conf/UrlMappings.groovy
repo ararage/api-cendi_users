@@ -6,9 +6,24 @@ class UrlMappings {
 			action = [GET:"notAllowed",POST:"postUser",PUT:"notAllowed",DELETE:"notAllowed"]
 		}
 
-   		"/$user_id"{
+		"/student/"{
 			controller = "User"
-			action = [GET:"getUser",POST:"notAllowed",PUT:"putUser",DELETE:"deleteUser"]
+			action = [GET:"notAllowed",POST:"notAllowed",PUT:"notAllowed",DELETE:"notAllowed"]
+		}
+
+		"/teacher/"{
+			controller = "User"
+			action = [GET:"notAllowed",POST:"notAllowed",PUT:"notAllowed",DELETE:"notAllowed"]
+		}
+
+   		"/student/$user_id"{
+			controller = "User"
+			action = [GET:"getStudent",POST:"notAllowed",PUT:"putStudent",DELETE:"deleteStudent"]
+		}
+
+		"/teacher/$user_id"{
+			controller = "User"
+			action = [GET:"getTeacher",POST:"notAllowed",PUT:"putTeacher",DELETE:"deleteTeacher"]
 		}	
 	}
 }

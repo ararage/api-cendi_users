@@ -5,6 +5,8 @@ import static org.springframework.http.HttpMethod.*
 import grails.plugin.gson.converters.GSON
 import org.springframework.dao.OptimisticLockingFailureException
 import com.api.cendi.UserService
+import com.api.cendi.StudentService
+import com.api.cendi.TeacherService
 import users.exceptions.NotFoundException
 import users.exceptions.ConflictException
 import users.exceptions.BadRequestException
@@ -13,7 +15,7 @@ import grails.converters.*
 
 class UserController {
 
-	private UserService userService = new UserService()
+	//private UserService userService = new UserService()
 
     def setHeaders(){
         response.setContentType "application/json; charset=utf-8"
@@ -54,7 +56,7 @@ class UserController {
         render mapResult as GSON
     }
 
-    def getUser() {
+    def getStudent() {
         setHeaders()
         def dominio = request.getServerName()+":"+request.getServerPort()
         def result = [:]
@@ -63,7 +65,8 @@ class UserController {
         boolean needsProcessing = true
         while(needsProcessing && retryCounter < maxretry) {
             try{
-                result = userService.getUser(params,dominio)
+                //result = userService.getUser(params,dominio)
+                result = new StudentService().getStudent(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
                 render result as GSON
                 needsProcessing=false;
@@ -86,7 +89,7 @@ class UserController {
         }
     }
 
-    def deleteUser() {
+    def getTeacher() {
         setHeaders()
         def dominio = request.getServerName()+":"+request.getServerPort()
         def result = [:]
@@ -95,10 +98,146 @@ class UserController {
         boolean needsProcessing = true
         while(needsProcessing && retryCounter < maxretry) {
             try{
-                result = userService.deleteUser(params,dominio)
+                //result = userService.getUser(params,dominio)
+                result = new TeacherService().getTeacher(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
                 render result as GSON
                 needsProcessing=false;
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (BadRequestException e) {
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
+
+    def deleteStudent() {
+        setHeaders()
+        def dominio = request.getServerName()+":"+request.getServerPort()
+        def result = [:]
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                //result = userService.deleteUser(params,dominio)
+                result = new StudentService().deleteStudent(params,dominio)
+                response.setStatus( HttpServletResponse.SC_OK)
+                render result as GSON
+                needsProcessing=false;
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (BadRequestException e) {
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
+
+    def deleteTeacher() {
+        setHeaders()
+        def dominio = request.getServerName()+":"+request.getServerPort()
+        def result = [:]
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                //result = userService.deleteUser(params,dominio)
+                result = new TeacherService().deleteTeacher(params,dominio)
+                response.setStatus( HttpServletResponse.SC_OK)
+                render result as GSON
+                needsProcessing=false;
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (BadRequestException e) {
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
+
+    def putStudent(){
+        setHeaders()
+        def dominio = request.getServerName()+":"+request.getServerPort()
+        def result
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                println "PUT"
+                //result = userService.putUser(params,dominio,request.JSON)
+                result = new StudentService().putStudent(params,dominio,request.JSON)
+                response.setStatus( HttpServletResponse.SC_CREATED)
+                render result as GSON
+                needsProcessing=false;
+                
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (BadRequestException e) {
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
+
+    def putTeacher(){
+        setHeaders()
+        def dominio = request.getServerName()+":"+request.getServerPort()
+        def result
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                println "PUT"
+                //result = userService.putUser(params,dominio,request.JSON)
+                result = new TeacherService().putTeacher(params,dominio,request.JSON)
+                response.setStatus( HttpServletResponse.SC_CREATED)
+                render result as GSON
+                needsProcessing=false;    
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -127,7 +266,8 @@ class UserController {
         boolean needsProcessing = true
         while(needsProcessing && retryCounter < maxretry) {
             try{
-                result = userService.postUser(request.JSON,dominio)
+                //result = userService.postUser(request.JSON,dominio)
+                result = new UserService().postUser(request.JSON,dominio)
                 response.setStatus( HttpServletResponse.SC_CREATED)
                 needsProcessing=false;
                 render result as GSON
@@ -148,39 +288,5 @@ class UserController {
               renderException(e)
             }
         }
-    }
-
-    def putUser(){
-        setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
-        def result
-        int retryCounter = 0
-        int maxretry=15
-        boolean needsProcessing = true
-        while(needsProcessing && retryCounter < maxretry) {
-            try{
-                println "PUT"
-                result = userService.putUser(params,dominio,request.JSON)
-                response.setStatus( HttpServletResponse.SC_CREATED)
-                render result as GSON
-                needsProcessing=false;
-                
-            }catch(NotFoundException e){
-                needsProcessing=false;
-                renderException(e)
-            }catch(ConflictException e){
-                needsProcessing=false;
-                renderException(e)
-            }catch (BadRequestException e) {
-                needsProcessing=false;
-                renderException(e)
-            }catch (OptimisticLockingFailureException olfex) {
-                if((retryCounter += 1) >= maxretry) renderException(olfex);
-            }catch(Exception e){
-              println "Users Exception error----> "+e
-              needsProcessing=false;
-              renderException(e)
-            }
-        }
-    }
+    } 
 }
