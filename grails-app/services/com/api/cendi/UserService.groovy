@@ -9,6 +9,8 @@ import users.exceptions.BadRequestException
 import com.api.util.UtilitiesService
 import grails.converters.*
 import com.api.cendi.Student
+import com.api.cendi.Teacher
+import com.api.cendi.School
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
@@ -53,7 +55,32 @@ class UserService {
             newUser.type = jsonUser?.type
             newUser.age = jsonUser?.age
             newUser.group  = jsonUser?.group
-            newUser.school = jsonUser?.school
+            
+            /*
+                def getSchool(def params, def dominio){
+        Map jsonResult = [:]
+        def schoolResult
+        if(!params.school_id){
+            throw new NotFoundException("Invalid URL, missing school_id")
+        }
+
+        schoolResult = School.findBySchool_id(params.school_id)
+        
+        new UtilitiesService().existSchool(schoolResult,params.school_id)
+
+        jsonResult = new UtilitiesService().fillSchoolResult(schoolResult)
+        jsonResult
+    }
+
+            */
+            def newSchool = School.findBySchool_id(jsonUser?.school_id)
+            
+            if(!newSchool){
+                throw new ConflictException("Invalid school_id")
+            }
+            
+            newUser.school_id = jsonUser?.school_id
+            
 
             if(!newUser.validate()) {
                 newUser.errors.allErrors.each {

@@ -4,7 +4,7 @@ class Student{
     
     String personalId
     String group
-    String school
+    String school_id
     String email
     String name
     String fName
@@ -35,6 +35,6 @@ class Student{
         //type            (nullable:false, blank:false, inList:['admin','teacher','student'])
         type            (nullable:false, blank:false, inList:['student'])
         group (blank:false, nullable:false, unique:false)
-        school (blank:false, nullable:false, unique:false)
+        school_id (blank:false, nullable:false, unique:false)
     }
 }

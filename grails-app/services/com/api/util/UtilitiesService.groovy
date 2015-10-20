@@ -34,14 +34,14 @@ class UtilitiesService {
 		jsonResult.name = newUser.name
 		jsonResult.fName = newUser.fName
 		jsonResult.lName = newUser.lName
-		jsonResult.dateDelete = newUser.dateOfBirth
+		jsonResult.registrationDate = newUser.dateOfBirth
 		jsonResult.sex = newUser.sex
 		jsonResult.profilePicture = newUser.profilePicture
 		jsonResult.status = newUser.status
 		jsonResult.type = newUser.type
 		jsonResult.age = newUser.age
 		jsonResult.group=newUser.group
-		jsonResult.school=newUser.school
+		jsonResult.school_id=newUser.school_id
 		println "Le result "+jsonResult
     	jsonResult
     }
