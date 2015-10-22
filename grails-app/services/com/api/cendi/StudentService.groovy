@@ -134,9 +134,11 @@ class StudentService {
             if(json?.group){
                 usuario.group = json.group
             }
-
-            if(json?.school){
-                usuario.school = json.school
+            
+            new UtilitiesService().existSchool(json?.school_id)
+            
+            if(json?.school_id){
+                usuario.school_id = json.school_id
             }
 
             if(json?.dateOfBirth){

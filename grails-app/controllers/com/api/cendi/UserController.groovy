@@ -2,7 +2,6 @@ package com.api.cendi
 
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.HttpMethod.*
-import grails.plugin.gson.converters.GSON
 import org.springframework.dao.OptimisticLockingFailureException
 import com.api.cendi.UserService
 import com.api.cendi.StudentService
@@ -41,7 +40,7 @@ class UserController {
             status: statusCode,
             error: error
         ]
-        render mapExcepction as GSON
+        render mapExcepction as JSON
     }
 
     def notAllowed(){
@@ -53,12 +52,12 @@ class UserController {
             status: HttpServletResponse.SC_METHOD_NOT_ALLOWED,
             error:"not_allowed"
         ]
-        render mapResult as GSON
+        render mapResult as JSON
     }
 
     def getStudent() {
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result = [:]
         int retryCounter = 0
         int maxretry=15
@@ -68,8 +67,8 @@ class UserController {
                 //result = userService.getUser(params,dominio)
                 result = new StudentService().getStudent(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
-                render result as GSON
                 needsProcessing=false;
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -91,7 +90,7 @@ class UserController {
 
     def getTeacher() {
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result = [:]
         int retryCounter = 0
         int maxretry=15
@@ -101,8 +100,8 @@ class UserController {
                 //result = userService.getUser(params,dominio)
                 result = new TeacherService().getTeacher(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
-                render result as GSON
                 needsProcessing=false;
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -124,7 +123,7 @@ class UserController {
 
     def deleteStudent() {
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result = [:]
         int retryCounter = 0
         int maxretry=15
@@ -134,8 +133,8 @@ class UserController {
                 //result = userService.deleteUser(params,dominio)
                 result = new StudentService().deleteStudent(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
-                render result as GSON
                 needsProcessing=false;
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -157,7 +156,7 @@ class UserController {
 
     def deleteTeacher() {
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result = [:]
         int retryCounter = 0
         int maxretry=15
@@ -167,8 +166,8 @@ class UserController {
                 //result = userService.deleteUser(params,dominio)
                 result = new TeacherService().deleteTeacher(params,dominio)
                 response.setStatus( HttpServletResponse.SC_OK)
-                render result as GSON
                 needsProcessing=false;
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -190,7 +189,7 @@ class UserController {
 
     def putStudent(){
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result
         int retryCounter = 0
         int maxretry=15
@@ -201,9 +200,8 @@ class UserController {
                 //result = userService.putUser(params,dominio,request.JSON)
                 result = new StudentService().putStudent(params,dominio,request.JSON)
                 response.setStatus( HttpServletResponse.SC_CREATED)
-                render result as GSON
                 needsProcessing=false;
-                
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -225,7 +223,7 @@ class UserController {
 
     def putTeacher(){
         setHeaders()
-        def dominio = request.getServerName()+":"+request.getServerPort()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
         def result
         int retryCounter = 0
         int maxretry=15
@@ -236,8 +234,8 @@ class UserController {
                 //result = userService.putUser(params,dominio,request.JSON)
                 result = new TeacherService().putTeacher(params,dominio,request.JSON)
                 response.setStatus( HttpServletResponse.SC_CREATED)
-                render result as GSON
                 needsProcessing=false;    
+                render result as JSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -259,7 +257,7 @@ class UserController {
 
     def postUser(){
     	setHeaders()
-    	def dominio = request.getServerName()+":"+request.getServerPort()
+    	def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
     	def result
         int retryCounter = 0
         int maxretry=15
@@ -269,8 +267,8 @@ class UserController {
                 //result = userService.postUser(request.JSON,dominio)
                 result = new UserService().postUser(request.JSON,dominio)
                 response.setStatus( HttpServletResponse.SC_CREATED)
+                render result as JSON
                 needsProcessing=false;
-                render result as GSON
             }catch(NotFoundException e){
                 needsProcessing=false;
                 renderException(e)
@@ -288,5 +286,44 @@ class UserController {
               renderException(e)
             }
         }
-    } 
+    }
+    
+    def searchStudent(){
+        setHeaders()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        def result
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                /*if(oauth){
+                    result = userService.searchUser(params)
+                    response.setStatus(HttpServletResponse.SC_OK)
+                }else{
+                    result = userService.searchUser(params, access_token)
+                    response.setStatus(HttpServletResponse.SC_OK)
+                }*/
+                result = new UserService().searchStudent(dominio,params)
+                response.setStatus(HttpServletResponse.SC_OK)
+                needsProcessing=false;
+                render result as JSON
+            }catch (BadRequestException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
 }

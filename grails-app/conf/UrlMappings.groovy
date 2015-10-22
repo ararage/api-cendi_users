@@ -5,6 +5,11 @@ class UrlMappings {
 			controller = "User"
 			action = [GET:"notAllowed",POST:"postUser",PUT:"notAllowed",DELETE:"notAllowed"]
 		}
+        
+        "/$user_id"{
+			controller = "User"
+			action = [GET:"notAllowed",POST:"postUser",PUT:"notAllowed",DELETE:"notAllowed"]
+		}
 
 		"/student/"{
 			controller = "User"
@@ -25,5 +30,10 @@ class UrlMappings {
 			controller = "User"
 			action = [GET:"getTeacher",POST:"notAllowed",PUT:"putTeacher",DELETE:"deleteTeacher"]
 		}	
+        
+        "/search/student"{
+            controller = "User"
+			action = [GET:"searchStudent",POST:"notAllowed",PUT:"notAllowed",DELETE:"notAllowed"]
+        }
 	}
 }

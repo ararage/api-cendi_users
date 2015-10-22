@@ -10,7 +10,7 @@ import com.api.util.UtilitiesService
 import grails.converters.*
 import com.api.cendi.Student
 import com.api.cendi.Teacher
-import com.api.cendi.School
+//import com.api.cendi.School
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
@@ -73,11 +73,13 @@ class UserService {
     }
 
             */
-            def newSchool = School.findBySchool_id(jsonUser?.school_id)
+            /*def newSchool = School.findBySchool_id(jsonUser?.school_id)
             
             if(!newSchool){
                 throw new ConflictException("Invalid school_id")
-            }
+            }*/
+            
+            new UtilitiesService().existSchool(jsonUser?.school_id)
             
             newUser.school_id = jsonUser?.school_id
             
@@ -94,6 +96,94 @@ class UserService {
         }
 
         jsonResult
+    }
+    
+    public def searchStudent(def dominio,def params){
+        Map jsonResult  = [:]
+        def queryMap    = [:]
+        
+        def userBoleta
+        //def userPassword
+        def tokenAdmin
+        
+        def student
+        
+        def SEARCH_PARAMS_MAP =[
+            boleta:"boleta",
+            //password: "password",
+            admin:"admin"
+        ]
+        
+        params.each { key, value ->
+            def newKey = SEARCH_PARAMS_MAP[key]
+            if (newKey){
+                queryMap[newKey]=value
+                if (newKey.equals("boleta")){
+                    userBoleta = value
+                }
+                /*if (newKey.equals("password")){
+                    userPassword = value
+                }*/
+                if (newKey.equals("admin")){
+                    tokenAdmin = value
+                }
+
+            }
+        }
+        
+        if (!queryMap){
+            throw new BadRequestException("Bad Request call, can't find the search params.")
+        }
+        
+        tokenAdminValid(tokenAdmin)
+        
+        def studentCriteria = Student.createCriteria()
+        
+        def result = studentCriteria.list(){
+            eq("personalId",userBoleta)
+            //eq("password",userPassword)
+        }
+        
+        if(result.size()<1){
+            throw new NotFoundException("Can't find that user.")
+        }
+        
+        def personalId
+        def status
+        def userType
+        
+        result.each{
+            personalId      = it.personalId
+            status      = it.status
+            userType    = it.type
+        }
+        
+        /*Verificar si esta bloqueado o en un estado que no permita iniciar sesion*/
+        
+        if (status.equals("history")){
+            throw new NotFoundException("Very old student, sorry.")
+        }else if(status.equals("blocked")){
+            throw new NotFoundException("Blocked student.")
+        }
+        
+        student = Student.findByPersonalId(userBoleta)
+        student.dateLastAccess = new Date()
+        student.save(flush:true)
+        
+        jsonResult.user_id      = personalId
+        jsonResult.status       = status
+        jsonResult.user_type    = userType
+        
+        jsonResult
+    }
+    
+    def tokenAdminValid(def token){
+        if(!token){
+            throw new BadRequestException("Access Invalid, Admin not found")
+        }
+        if (!token.equals("CENDIADMIN_T4FG637F")){
+            throw new NotFoundException("Access admin = "+token+" is not found")
+        }
     }
 
     public def getUsers(def params,def dominio) {
