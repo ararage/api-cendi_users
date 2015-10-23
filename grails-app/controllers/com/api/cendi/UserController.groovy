@@ -326,4 +326,43 @@ class UserController {
             }
         }
     }
+
+    def searchTeacher(){
+        setHeaders()
+        def dominio = "http://"+request.getServerName()+":"+request.getServerPort()
+        int retryCounter = 0
+        int maxretry=15
+        boolean needsProcessing = true
+        def result
+        while(needsProcessing && retryCounter < maxretry) {
+            try{
+                /*if(oauth){
+                    result = userService.searchUser(params)
+                    response.setStatus(HttpServletResponse.SC_OK)
+                }else{
+                    result = userService.searchUser(params, access_token)
+                    response.setStatus(HttpServletResponse.SC_OK)
+                }*/
+                result = new UserService().searchTeacher(dominio,params)
+                response.setStatus(HttpServletResponse.SC_OK)
+                needsProcessing=false;
+                render result as JSON
+            }catch (BadRequestException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(NotFoundException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch(ConflictException e){
+                needsProcessing=false;
+                renderException(e)
+            }catch (OptimisticLockingFailureException olfex) {
+                if((retryCounter += 1) >= maxretry) renderException(olfex);
+            }catch(Exception e){
+              println "Users Exception error----> "+e
+              needsProcessing=false;
+              renderException(e)
+            }
+        }
+    }
 }

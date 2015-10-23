@@ -24,11 +24,12 @@ class TeacherService {
 
         userResult = Teacher.findByPersonalId(params.user_id)
 
-        existUser(userResult,params.user_id)
+        new UtilitiesService().existUser(userResult,params.user_id)
 
         //jsonResult = getResultAdmin(userResult)
 
         println "Le user type "+userResult.type
+
         if(userResult.type.equals("teacher")){
             jsonResult = getTeacherByAdmin(userResult)
         }
@@ -57,7 +58,7 @@ class TeacherService {
         if(json.type.equals("teacher")){
             usuario = Teacher.findByPersonalId(params.user_id)
             println "Usuario "+usuario
-            existUser(usuario,params.user_id)
+            new UtilitiesService().existUser(usuario,params.user_id)
 
             jsonResult = modificaTeacher(dominio,usuario,json)
         }
@@ -74,7 +75,7 @@ class TeacherService {
 
         userResult = Teacher.findByPersonalId(params.user_id)
 
-        existUser(userResult,params.user_id)
+        new UtilitiesService().existUser(userResult,params.user_id)
 
         //jsonResult = getResultAdmin(userResult)
 
@@ -91,7 +92,10 @@ class TeacherService {
         def responseMessage = ''
         Map jsonResult = [:]
 
-        if(json?.type.equals("student")){
+        if(json?.type.equals("teacher")){
+
+            new UtilitiesService().existSchool(json?.school_id)
+
             if(json?.group){
                 usuario.group = json.group
             }
@@ -128,12 +132,33 @@ class TeacherService {
                 usuario.status = json.status
             }
 
-            if(json?.group){
-                usuario.group = json.group
+            if(json?.school_id){
+                usuario.school_id = json.school_id
             }
 
-            if(json?.school){
-                usuario.school = json.school
+            if(json?.group){
+                //usuario.group = json.group
+                usuario.groups = []
+                for(element in json.groups){
+                    def groupClass = new Group(
+                        teacher_id: usuario.personalId,
+                        group_name : element.group_name,
+                        school_id : usuario.school_id
+                    )
+
+                    if(!groupClass.validate()) {
+                        groupClass.errors.allErrors.each {
+                            responseMessage += MessageFormat.format(it.defaultMessage, it.arguments) + " "
+                        }
+                        throw new BadRequestException(responseMessage)
+                    }
+
+                    usuario.groups.add(
+                        teacher_id: groupClass.teacher_id,
+                        group_name : groupClass.group_name,
+                        school_id : groupClass.school_id
+                    )
+                }
             }
 
             if(json?.dateOfBirth){
@@ -173,8 +198,8 @@ class TeacherService {
 		jsonResult.status = newUser.status
 		jsonResult.type = newUser.type
 		jsonResult.age = newUser.age
-		jsonResult.group=newUser.group
-		jsonResult.school=newUser.school
+		jsonResult.groups=newUser.groups
+		jsonResult.school_id=newUser.school_id
 		println "Le result "+jsonResult
     	jsonResult
     }

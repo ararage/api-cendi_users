@@ -35,5 +35,10 @@ class UrlMappings {
             controller = "User"
 			action = [GET:"searchStudent",POST:"notAllowed",PUT:"notAllowed",DELETE:"notAllowed"]
         }
+
+        "/search/teacher"{
+            controller = "User"
+			action = [GET:"searchTeacher",POST:"notAllowed",PUT:"notAllowed",DELETE:"notAllowed"]
+        }
 	}
 }
